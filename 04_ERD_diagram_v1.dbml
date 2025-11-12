@@ -1,0 +1,151 @@
+Project PonyPlanner {
+  database_type: 'SQLite'
+  Note: 'Event discovery and engagement platform for SMU'
+}
+
+Table users {
+  id INTEGER [pk, increment]
+  email TEXT [not null, unique]
+  hashed_password TEXT [not null]
+  first_name TEXT [not null]
+  last_name TEXT [not null]
+  role TEXT [not null, note: 'student, faculty, organizer, admin']
+  graduation_year INTEGER
+  major TEXT
+  profile_visibility TEXT [default: 'public', note: 'public, contacts_only, private']
+  show_in_whos_going BOOLEAN [default: true]
+  created_at DATETIME [not null, default: `CURRENT_TIMESTAMP`]
+  last_login DATETIME
+  is_active BOOLEAN [default: true]
+}
+
+Table venues {
+  id INTEGER [pk, increment]
+  name TEXT [not null]
+  address TEXT [not null]
+  city TEXT [not null]
+  state TEXT [not null]
+  zip_code TEXT [not null]
+  capacity INTEGER [not null]
+  amenities TEXT [note: 'JSON array']
+  latitude NUMERIC
+  longitude NUMERIC
+  is_campus BOOLEAN [default: true]
+  created_at DATETIME [not null, default: `CURRENT_TIMESTAMP`]
+}
+
+Table event_categories {
+  id INTEGER [pk, increment]
+  name TEXT [not null, unique]
+  description TEXT
+  icon TEXT
+  display_order INTEGER
+}
+
+Table events {
+  id INTEGER [pk, increment]
+  title TEXT [not null]
+  description TEXT [not null]
+  category_id INTEGER [not null, ref: > event_categories.id]
+  event_date DATE [not null]
+  event_time TEXT [not null]
+  duration_minutes INTEGER
+  capacity INTEGER [not null]
+  organizer_id INTEGER [not null, ref: > users.id]
+  venue_id INTEGER [not null, ref: > venues.id]
+  image_url TEXT
+  is_recurring BOOLEAN [default: false]
+  recurrence_pattern TEXT [note: 'JSON']
+  is_active BOOLEAN [default: true]
+  created_at DATETIME [not null, default: `CURRENT_TIMESTAMP`]
+  updated_at DATETIME [not null, default: `CURRENT_TIMESTAMP`]
+}
+
+Table rsvps {
+  id INTEGER [pk, increment]
+  user_id INTEGER [not null, ref: > users.id]
+  event_id INTEGER [not null, ref: > events.id]
+  rsvp_status TEXT [not null, note: 'confirmed, waitlist, cancelled']
+  rsvp_date DATETIME [not null, default: `CURRENT_TIMESTAMP`]
+  attended BOOLEAN [default: false]
+  checked_in_at DATETIME
+  feedback_rating INTEGER [note: '1-5']
+  feedback_text TEXT
+  referral_source TEXT [note: 'recommendation, contact_notification, search, direct']
+  created_at DATETIME [not null, default: `CURRENT_TIMESTAMP`]
+  updated_at DATETIME [not null, default: `CURRENT_TIMESTAMP`]
+  
+  indexes {
+    (user_id, event_id) [unique]
+  }
+}
+
+Table contact_links {
+  id INTEGER [pk, increment]
+  user_id INTEGER [not null, ref: > users.id]
+  contact_user_id INTEGER [not null, ref: > users.id]
+  relationship_type TEXT [not null, note: 'imported, platform_friend, mutual']
+  created_at DATETIME [not null, default: `CURRENT_TIMESTAMP`]
+  
+  indexes {
+    (user_id, contact_user_id) [unique]
+  }
+}
+
+Table vendors {
+  id INTEGER [pk, increment]
+  name TEXT [not null]
+  description TEXT
+  contact_email TEXT
+  website TEXT
+  logo_url TEXT
+  vendor_type TEXT [note: 'sponsor, catering, av_services, other']
+  created_at DATETIME [not null, default: `CURRENT_TIMESTAMP`]
+}
+
+Table event_vendors {
+  id INTEGER [pk, increment]
+  event_id INTEGER [not null, ref: > events.id]
+  vendor_id INTEGER [not null, ref: > vendors.id]
+  sponsorship_level TEXT
+  sponsorship_amount NUMERIC
+  created_at DATETIME [not null, default: `CURRENT_TIMESTAMP`]
+  
+  indexes {
+    (event_id, vendor_id) [unique]
+  }
+}
+
+Table recommendations {
+  id INTEGER [pk, increment]
+  user_id INTEGER [not null, ref: > users.id]
+  event_id INTEGER [not null, ref: > events.id]
+  recommendation_score NUMERIC [not null, note: '0.0 to 1.0']
+  algorithm_type TEXT [not null]
+  reason TEXT
+  generated_at DATETIME [not null, default: `CURRENT_TIMESTAMP`]
+  clicked BOOLEAN [default: false]
+  rsvped BOOLEAN [default: false]
+}
+
+Table user_interests {
+  id INTEGER [pk, increment]
+  user_id INTEGER [not null, ref: > users.id]
+  interest_name TEXT [not null]
+  created_at DATETIME [not null, default: `CURRENT_TIMESTAMP`]
+  
+  indexes {
+    (user_id, interest_name) [unique]
+  }
+}
+
+Table event_tags {
+  id INTEGER [pk, increment]
+  event_id INTEGER [not null, ref: > events.id]
+  tag_name TEXT [not null]
+  created_at DATETIME [not null, default: `CURRENT_TIMESTAMP`]
+  
+  indexes {
+    (event_id, tag_name) [unique]
+  }
+}
