@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PonyPlanner ERD</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .mermaid {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <h1>PonyPlanner Database ERD</h1>
+    <div class="mermaid">
+erDiagram
+    users ||--o{ events : "organizes"
+    users ||--o{ rsvps : "creates"
+    users ||--o{ contact_links : "has"
+    users ||--o{ user_interests : "has"
+    users ||--o{ recommendations : "receives"
+    
+    venues ||--o{ events : "hosts"
+    
+    event_categories ||--o{ events : "categorizes"
+    
+    events ||--o{ rsvps : "receives"
+    events ||--o{ event_vendors : "sponsored_by"
+    events ||--o{ event_tags : "tagged_with"
+    events ||--o{ recommendations : "recommended"
+    
+    vendors ||--o{ event_vendors : "sponsors"
+    
+    users {
+        INTEGER id PK
+        TEXT email UK
+        TEXT hashed_password
+        TEXT first_name
+        TEXT last_name
+        TEXT role
+        INTEGER graduation_year
+        TEXT major
+        TEXT profile_visibility
+        BOOLEAN show_in_whos_going
+        DATETIME created_at
+        DATETIME last_login
+        BOOLEAN is_active
+    }
+    
+    venues {
+        INTEGER id PK
+        TEXT name
+        TEXT address
+        TEXT city
+        TEXT state
+        TEXT zip_code
+        INTEGER capacity
+        TEXT amenities
+        NUMERIC latitude
+        NUMERIC longitude
+        BOOLEAN is_campus
+        DATETIME created_at
+    }
+    
+    event_categories {
+        INTEGER id PK
+        TEXT name UK
+        TEXT description
+        TEXT icon
+        INTEGER display_order
+    }
+    
+    events {
+        INTEGER id PK
+        TEXT title
+        TEXT description
+        INTEGER category_id FK
+        DATE event_date
+        TEXT event_time
+        INTEGER duration_minutes
+        INTEGER capacity
+        INTEGER organizer_id FK
+        INTEGER venue_id FK
+        TEXT image_url
+        BOOLEAN is_recurring
+        TEXT recurrence_pattern
+        BOOLEAN is_active
+        DATETIME created_at
+        DATETIME updated_at
+    }
+    
+    rsvps {
+        INTEGER id PK
+        INTEGER user_id FK
+        INTEGER event_id FK
+        TEXT rsvp_status
+        DATETIME rsvp_date
+        BOOLEAN attended
+        DATETIME checked_in_at
+        INTEGER feedback_rating
+        TEXT feedback_text
+        TEXT referral_source
+        DATETIME created_at
+        DATETIME updated_at
+    }
+    
+    contact_links {
+        INTEGER id PK
+        INTEGER user_id FK
+        INTEGER contact_user_id FK
+        TEXT relationship_type
+        DATETIME created_at
+    }
+    
+    vendors {
+        INTEGER id PK
+        TEXT name
+        TEXT description
+        TEXT contact_email
+        TEXT website
+        TEXT logo_url
+        TEXT vendor_type
+        DATETIME created_at
+    }
+    
+    event_vendors {
+        INTEGER id PK
+        INTEGER event_id FK
+        INTEGER vendor_id FK
+        TEXT sponsorship_level
+        NUMERIC sponsorship_amount
+        DATETIME created_at
+    }
+    
+    recommendations {
+        INTEGER id PK
+        INTEGER user_id FK
+        INTEGER event_id FK
+        NUMERIC recommendation_score
+        TEXT algorithm_type
+        TEXT reason
+        DATETIME generated_at
+        BOOLEAN clicked
+        BOOLEAN rsvped
+    }
+    
+    user_interests {
+        INTEGER id PK
+        INTEGER user_id FK
+        TEXT interest_name
+        DATETIME created_at
+    }
+    
+    event_tags {
+        INTEGER id PK
+        INTEGER event_id FK
+        TEXT tag_name
+        DATETIME created_at
+    }
+    </div>
+
+    <script>
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'default',
+            er: {
+                fontSize: 14
+            }
+        });
+    </script>
+</body>
+</html>
